@@ -1,0 +1,317 @@
+<!-- api login--->
+
+
+1.use in user model
+use Laravel\Santum\HasApiTokens;
+
+pase in user mig:
+  public function up(): void
+    {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
+        });
+    }
+
+now create post migration:
+php artisan make:migration create_posts_table
+
+2. create api file:
+php artisan install:api
+and then migrate
+
+3. User mode:
+use Laravel\Sanctum\HasApiTokens;
+use HasFactory, Notifiable,HasApiTokens;
+and remove " 'email_verified_at' => 'datetime'," form cast
+
+4.make api controller:
+php artisan make:controller API/AuthController
+php artisan make:model Post
+<!-- --api means resouse controller api  -->
+php artisan make:controller Api/PostController --api
+
+post model:
+use HasFactory;
+    protected $fillable = [
+        'title','description','image'
+    ];
+
+<!-- Auth Controller  -->
+<?php
+
+// namespace App\Http\Controllers\API;
+
+// use App\Http\Controllers\Controller;
+// use App\Models\User;
+// use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Auth;
+// use Illuminate\Support\Facades\Validator;
+
+// class AuthController extends Controller
+// {
+//     public function signup(Request $request){
+//         $validateUser= Validator::make(
+//             $request->all(),
+//             [
+//                      'name'=>'required',
+//                      'email'=> 'required|email|unique:users,email',
+//                      'password'=>'required',
+//                     ]
+//             );
+//             if($validateUser->fails()){
+//                 return response()->json([
+//                     'status'=>false,
+//                     'message'=>'Validation Error',
+//                     'error'=> $validateUser->errors()->all()
+//                 ],401);
+//             }
+//             $user = User::create([
+//                 'name'=>$request->name,
+//                 'email'=>$request->email,
+//                 'password'=>$request->password,
+//                 // 'password' => bcrypt($request->password),
+//             ]);
+//             return response()->json([
+//                 'status'=>true,
+//                 'message'=>'User Created Successfully',
+//                 'user'=>$user,
+//             ],200 );
+//     }
+//     public function login(Request $request){
+//         $validateUser= Validator::make(
+//             $request->all(),
+//             [
+//                      'email'=> 'required|email',
+//                      'password'=>'required',
+//                     ]
+//             );
+//             if($validateUser->fails()){
+//                 return response()->json([
+//                     'status'=>false,
+//                     'message'=>'Authentication Faild',
+//                     'error'=> $validateUser->errors()->all()
+//                 ],404);
+//             }
+//             if(Auth::attempt(['email'=>$request->email, 'password'=>$request->password])){
+//             $authUser = Auth::user();
+//                 return response()->json([
+//                     'status'=>true,
+//                     'message'=>'User Login Successfully',
+//                     'token'=>$authUser->createToken("API Token")->plainTextToken,
+//                     'token_type'=>'bearer'
+//                 ],200 );
+//             }else{
+//                 return response()->json([
+//                     'status'=>false,
+//                     'message'=>'Email and Passord not matched',
+//                 ],404);
+//             }
+//     }
+//     public function logout(Request $request){
+//         $user = $request->user();
+//         $user->tokens()->delete();
+//         return response()->json([
+//             'status'=>true,
+//             'message'=>'You Logout Successfully',
+//         ],200);
+//     }
+
+
+
+
+
+// post controller :
+// class PostController extends Controller
+// {
+    /**
+     * Display a listing of the resource.
+     */
+    // public function index()
+    // {
+    //     $data['posts'] = Post::all();
+    //     return response()->json([
+    //         'status'=>true,
+    //         'message'=>'All Post Data',
+    //         'data'=> $data,
+    //     ],200);
+    // }
+
+    // /**
+    //  * Store a newly created resource in storage.
+    //  */
+    // public function store(Request $request)
+    // {
+    //     $validateUser= Validator::make(
+    //         $request->all(),
+    //         [
+    //                  'title'=>'required',
+    //                  'description'=> 'required',
+    //                  'image'=>'required|mimes:png,jpg,jpeg,gif',
+    //                 ]
+    //         );
+    //         if($validateUser->fails()){
+    //             return response()->json([
+    //                 'status'=>false,
+    //                 'message'=>'Validation Error',
+    //                 'error'=> $validateUser->errors()->all()
+    //             ],401);
+    //         }
+    //         $img = $request->image;
+    //         $text= $img->getClientOriginalExtension();
+    //         $imageName = time(). '.' . $text;
+    //         $img->move(public_path(). '/uploads', $imageName);
+
+    //         $post = Post::create([
+    //             'title'=>$request->title,
+    //             'description'=>$request->description,
+    //             'image'=>$imageName,
+    //         ]);
+    //         return response()->json([
+    //             'status'=>true,
+    //             'message'=>'Post Created Successfully',
+    //             'post'=>$post,
+    //         ],200 );
+    // }
+
+    // /**
+    //  * Display the specified resource.
+    //  */
+    // public function show(string $id)
+    // {
+    //     $data['post'] = Post::select(
+    //         'id',
+    //         'title',
+    //         'description',
+    //         'image',
+
+    //     )->where(['id'=>$id])->get();
+
+    //     return response()->json([
+    //         'status'=>true,
+    //         'message'=>'Post Created Successfully',
+    //         'data'=>$data,
+    //     ],200 );
+    // }
+
+    // /**
+    //  * Update the specified resource in storage.
+    //  */
+    // public function update(Request $request, string $id)
+    // {
+    //     $validateUser= Validator::make(
+    //         $request->all(),
+    //         [
+    //                  'title'=>'required',
+    //                  'description'=> 'required',
+    //                  'image'=>'required|mimes:png,jpg,jpeg,gif',
+    //                 ]
+    //         );
+    //         if($validateUser->fails()){
+    //             return response()->json([
+    //                 'status'=>false,
+    //                 'message'=>'Validation Error',
+    //                 'error'=> $validateUser->errors()->all()
+    //             ],401);
+
+    //         }
+
+    //         $postImage = Post::select('id','image')
+    //          ->where(['id'=>$id])->get();
+    //         // return $postImage;
+    //         // return $postImage[0]->image;
+
+
+    //         // note: best way to use first method
+
+    //         if($request->image != ''){
+    //             $path = public_path() . '/uploads';
+    //             if($postImage[0]->image != '' && $postImage[0]->image != null){
+    //                 $old_file = $path. '/'. $postImage[0]->image;
+    //                 if(file_exists($old_file)){
+    //                     unlink($old_file);
+    //                 }
+    //             }
+    //             $img = $request->image;
+    //             $text= $img->getClientOriginalExtension();
+    //             $imageName = time(). '.' . $text;
+    //             $img->move(public_path(). '/uploads', $imageName);
+    //         }else{
+    //             $imageName = $postImage->image;
+    //         }
+
+
+
+    //         $post = Post::where(['id'=> $id])->update([
+    //             'title'=>$request->title,
+    //             'description'=>$request->description,
+    //             'image'=>$imageName,
+    //         ]);
+    //         return response()->json([
+    //             'status'=>true,
+    //             'message'=>'Post Updated Successfully',
+    //             'post'=>$post,
+    //         ],200 );
+    // }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    // public function destroy(string $id)
+    // {
+    //     $imagePath= Post::select('image')->where('id',$id)->get();
+    //     $filePath = public_path(). '/uploads/' . $imagePath[0]['image'];
+
+    //     unlink($filePath);
+
+    //     $post = Post::where('id',$id)->delete();
+
+    //     return response()->json([
+    //         'status'=>true,
+    //         'message'=>'Your Post Deleted Successfully',
+    //         'post'=>$post,
+    //     ],200 );
+    // }
+}
+
+
+
+
+
+
+
+
+
+// when update post with post man then update post method
+// but used Post mehthod but in body use : _method= PUT
+
+
+// api route:
+
+// Route::post('signup',[AuthController::class, 'signup']);
+// Route::post('login',[AuthController::class, 'login']);
+// // simple
+// // Route::post('logout',[AuthController::class, 'logout']);
+
+// // check login or not
+// // with out group
+// // Route::post('logout',[AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+// // api resource
+// // with out group
+// // Route::apiResource('posts',PostController::class)->middleware('auth:sanctum');
+
+
+// // group api Middleware route
+// Route::middleware('auth:sanctum')->group(function(){
+//     Route::post('logout',[AuthController::class, 'logout']);
+//     Route::apiResource('posts',PostController::class);
+
+// });
+
+// make a common controlle to make code reduce and clean :
+// php artisan make:controller APi/ComController;
