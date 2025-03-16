@@ -87,50 +87,46 @@ class PostController extends ComController
         $validateUser= Validator::make(
             $request->all(),
             [
-                     'title'=>'required',
-                     'description'=> 'required',
-                     'image'=>'required|mimes:png,jpg,jpeg,gif',
-                    ]
-            );
-            if($validateUser->fails()){
-                return $this->sendError('Validation Error',$validateUser->errors()->all());
+                'title'=>'required',
+                'description'=> 'required',
+                'image'=>'nullable|image|mimes:png,jpg,jpeg,gif',
+            ]
+        );
+
+        if($validateUser->fails()){
+            return $this->sendError('Validation Error', $validateUser->errors()->all());
+        }
+
+        $post = Post::find($id);
+
+        if(!$post){
+            return $this->sendError('Error', ['Post not found']);
+        }
+
+        if ($request->hasFile('image')) {
+            $path = public_path() . '/uploads';
+
+            // পুরোনো ছবি ডিলিট করা
+            if ($post->image && file_exists($path . '/' . $post->image)) {
+                unlink($path . '/' . $post->image);
             }
 
-            $postImage = Post::select('id','image')
-             ->where(['id'=>$id])->get();
-            // return $postImage;
-            // return $postImage[0]->image;
+            $img = $request->file('image');
+            $imageName = time() . '.' . $img->getClientOriginalExtension();
+            $img->move($path, $imageName);
+        } else {
+            $imageName = $post->image; // আগের ইমেজ ঠিক রাখার জন্য
+        }
 
+        $post->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'image' => $imageName,
+        ]);
 
-            // note: best way to use first method
-
-            if($request->image != ''){
-                $path = public_path() . '/uploads';
-                if($postImage[0]->image != '' && $postImage[0]->image != null){
-                    $old_file = $path. '/'. $postImage[0]->image;
-                    if(file_exists($old_file)){
-                        unlink($old_file);
-                    }
-                }
-                $img = $request->image;
-                $text= $img->getClientOriginalExtension();
-                $imageName = time(). '.' . $text;
-                $img->move(public_path(). '/uploads', $imageName);
-            }else{
-                $imageName = $postImage->image;
-            }
-
-
-
-            $post = Post::where(['id'=> $id])->update([
-                'title'=>$request->title,
-                'description'=>$request->description,
-                'image'=>$imageName,
-            ]);
-
-            return $this->sendResponse($post,'Post Updated Successfully');
-
+        return $this->sendResponse($post, 'Post Updated Successfully');
     }
+
 
     /**
      * Remove the specified resource from storage.
